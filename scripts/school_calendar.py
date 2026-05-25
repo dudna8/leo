@@ -2,6 +2,7 @@ import json
 import os
 import requests
 from bs4 import BeautifulSoup
+from datetime import datetime, date, timedelta
 
 
 def ziskaj_udalosti():
@@ -9,6 +10,21 @@ def ziskaj_udalosti():
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
     }
+
+    # Mapa slovenských mesiacov na čísla
+    mesiace_map = {
+        "Január": 1, "Február": 2, "Marec": 3, "Apríl": 4, 
+        "Máj": 5, "Jún": 6, "Júl": 7, "August": 8, 
+        "September": 9, "Október": 10, "November": 11, "December": 12
+    }
+    
+    today = datetime.now().date()
+
+    # Logika pre posun zobrazenia: ak je dnes víkend, hľadáme až od pondelka
+    zobrazit_od = today
+    if today.weekday() >= 5:  # 5 = Sobota, 6 = Nedeľa
+        dni_do_pondelka = 7 - today.weekday()
+        zobrazit_od = today + timedelta(days=dni_do_pondelka)
 
     current_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(current_dir)
@@ -46,14 +62,43 @@ def ziskaj_udalosti():
                 
                 if day_num_el and title_el:
                     day_num = day_num_el.get_text(strip=True)
-                    day_name = day_name_el.get_text(strip=True) if day_name_el else ""
                     
                     # Názov môže obsahovať <br>, takže to elegantne spojíme s čiarou
                     title_text = title_el.get_text(separator=" | ", strip=True)
                     
-                    full_date = f"{day_num}. {day_name} ({current_month})"
+                    # Logika pre výpočet zostávajúcich dní
+                    m_num = mesiace_map.get(current_month, today.month)
+                    year = today.year
+                    
+                    # Ak je mesiac udalosti menší ako aktuálny mesiac, pravdepodobne ide o budúci rok
+                    if m_num < today.month:
+                        year += 1
+                    
+                    try:
+                        event_date = date(year, m_num, int(day_num))
+                        
+                        # NEUKAZOVAT VECI KTORE UZ BOLI (alebo sú cez víkend, ak je dnes víkend)
+                        if event_date < zobrazit_od:
+                            continue
+                            
+                        diff = (event_date - today).days
+                        
+                        if diff == 0:
+                            ostava = "dnes"
+                        elif diff == 1:
+                            ostava = "zajtra"
+                        elif 1 < diff < 5:
+                            ostava = f"o {diff} dni"
+                        else:
+                            ostava = f"o {diff} dní"
+                            
+                        cas_display = f"{day_num}.{m_num}."
+                    except ValueError:
+                        continue
+
                     events.append({
-                        "cas": full_date,
+                        "cas": cas_display,
+                        "ostava": ostava,
                         "nazov": title_text
                     })
 
@@ -64,6 +109,9 @@ def ziskaj_udalosti():
                     "nazov": "Momentálne nie sú v kalendári žiadne nadchádzajúce udalosti."
                 }
             ]
+
+        # Obmedzíme počet zobrazených udalostí na 5 najnovších
+        events = events[:5]
 
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(events, f, ensure_ascii=False, indent=4)
@@ -77,7 +125,3 @@ def ziskaj_udalosti():
 
 if __name__ == "__main__":
     ziskaj_udalosti()
-
-
-if __name__ == "__main__":
-    get_calendar()

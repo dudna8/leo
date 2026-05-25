@@ -114,8 +114,8 @@ def ziskaj_dnesny_obed():
             if hladana_skratka:
                 for kluc in weekly_menu.keys():
                     if kluc.startswith(hladana_skratka):
-                        return [m["nazov"] for m in weekly_menu[kluc]]
-        return ["Menu nie je k dispozícii."]
+                        return weekly_menu[kluc]
+        return [{"typ": "Info", "nazov": "Menu nie je k dispozícii."}]
 
     except Exception as e:
         print(f"Chyba pri scrapovaní: {e}")
