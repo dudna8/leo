@@ -1,10 +1,17 @@
 import requests
+from datetime import date
 
-def ziskaj_predpoved_bratislava():
+def ziskaj_predpoved_bratislava(target_date=None):
     """
     Stiahne hodinovú predpoveď z Open-Meteo API pre Bratislavu
-    a vytiahne teplotu a podmienky pre 7:00, 12:00 a 16:00.
+    pre zadaný dátum.
     """
+    if target_date is None:
+        target_date = date.today()
+
+    today = date.today()
+    days_diff = (target_date - today).days
+
     # Súradnice pre Bratislavu
     latitude = 48.1486
     longitude = 17.1077
@@ -16,7 +23,7 @@ def ziskaj_predpoved_bratislava():
         "longitude": longitude,
         "hourly": ["temperature_2m", "weather_code"],
         "timezone": "Europe/Berlin", # Nastavenie časového pásma pre správne indexovanie hodín
-        "forecast_days": 1
+        "forecast_days": days_diff + 1
     }
     
     try:
@@ -61,11 +68,13 @@ def ziskaj_predpoved_bratislava():
         vysledky = []
         
         for hodina in vybrane_casy:
-            if hodina < len(teploty):
-                kod = kody_pocasia[hodina]
+            # Index v poli: (počet dní od dnes * 24 hodín) + konkrétna hodina
+            idx = (days_diff * 24) + hodina
+            if idx < len(teploty):
+                kod = kody_pocasia[idx]
                 vysledky.append({
                     "cas": f"{hodina}:00",
-                    "teplota": f"{teploty[hodina]}°C",
+                    "teplota": f"{teploty[idx]}°C",
                     "stav": wmo_popis.get(kod, "Neznáme"),
                     "ikona": wmo_ikony.get(kod, "bi-question-circle")
                 })

@@ -63,7 +63,7 @@
         .type-obed { background: #ebfbee; color: #27ae60; }
         .type-olovrant { background: #fef5e7; color: #d35400; }
         .type-default { background: #f1f2f6; color: #7f8c8d; }
-        .meal-name { font-weight: 500; color: var(--text-main); display: block; line-height: 1.4; }
+        .meal-name { font-weight: 500; color: var(--text-main); display: block; line-height: 1.7; white-space: pre-line; padding-left: 5px; }
 
         .clock-container { margin-bottom: 25px; }
         #current-time { font-size: 3.5rem; font-weight: 800; color: var(--text-main); letter-spacing: -2px; margin-bottom: 5px; }
@@ -73,6 +73,16 @@
         .calendar-item .event-title { font-weight: 600; color: var(--text-main); }
         .calendar-item .event-date { font-size: 0.85rem; color: var(--accent); font-weight: 700; text-transform: uppercase; }
         .today-highlight { color: #e74c3c !important; }
+
+        /* Animácia pulzovania pre iný ako dnešný deň */
+        @keyframes pulse-opacity {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+        .pulse-text {
+            animation: pulse-opacity 2.5s infinite ease-in-out;
+        }
     </style>
 </head>
 <body>
@@ -82,6 +92,9 @@
             <div class="clock-container">
                 <div id="current-time">00:00:00</div>
                 <div id="current-date">Načítavam dátum...</div>
+                <div class="{% if not je_dnes %}pulse-text{% endif %}" style="margin-top: 15px; font-size: 0.95rem; color: {% if je_dnes %}var(--accent){% else %}#e67e22{% endif %}; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
+                    <i class="bi bi-calendar-check"></i> Údaje pre: {{ datum_zobrazenia }}
+                </div>
             </div>
         </header>
 
@@ -106,7 +119,7 @@
 
             <!-- OBED -->
             <div class="card">
-                <h2>🍲 Dnešný obed</h2>
+                <h2>🍲 Jedálny lístok</h2>
                 {% if obed and obed is iterable %}
                     {% for chod in obed %}
                     <div class="item">

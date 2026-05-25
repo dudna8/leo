@@ -1,5 +1,6 @@
 from flask import Flask, render_template
 import logging
+from datetime import datetime, timedelta
 import sys
 import os
 
@@ -18,8 +19,8 @@ try:
 except ImportError as e:
     app.logger.error(f"KRITICKÁ CHYBA IMPORTU: {e}")
     # Definujeme náhradné funkcie, aby Flask aspoň naštartoval a vyhol sa 502
-    ziskaj_predpoved_bratislava = lambda: None
-    ziskaj_dnesny_obed = lambda: [{"typ": "Chyba", "nazov": "Chyba pri načítaní skriptov."}]
+    ziskaj_predpoved_bratislava = lambda td: None
+    ziskaj_dnesny_obed = lambda td: [{"typ": "Chyba", "nazov": "Chyba pri načítaní skriptov."}]
     ziskaj_udalosti = lambda: []
 
 @app.route('/')
@@ -28,13 +29,28 @@ def home():
     obed = [{"typ": "Info", "nazov": "Informácie o obede nie sú dostupné."}]
     udalosti = []
 
+    # Logika pre výber dňa
+    now = datetime.now()
+    target_date = now.date()
+
+    # Ak je po 16:00, pozeráme sa na ďalší deň
+    if now.hour >= 16:
+        target_date += timedelta(days=1)
+
+    # Ak je cieľový deň víkend, posunieme sa na pondelok
+    while target_date.weekday() >= 5:  # 5 = Sobota, 6 = Nedeľa
+        target_date += timedelta(days=1)
+
+    # Zistíme, či zobrazujeme dnešný deň
+    je_dnes = target_date == now.date()
+
     try:
-        pocasie = ziskaj_predpoved_bratislava()
+        pocasie = ziskaj_predpoved_bratislava(target_date)
     except Exception as e:
         app.logger.error(f"Chyba pocasie: {e}")
 
     try:
-        obed = ziskaj_dnesny_obed()
+        obed = ziskaj_dnesny_obed(target_date)
     except Exception as e:
         app.logger.error(f"Chyba obed: {e}")
 
@@ -43,10 +59,16 @@ def home():
     except Exception as e:
         app.logger.error(f"Chyba kalendar: {e}")
 
+    # Formátovanie dátumu pre zobrazenie v hlavičke (napr. Pondelok 20.05.2024)
+    dni = ["Pondelok", "Utorok", "Streda", "Štvrtok", "Piatok", "Sobota", "Nedeľa"]
+    datum_zobrazenia = f"{dni[target_date.weekday()]} {target_date.strftime('%d.%m.%Y')}"
+
     return render_template('index.html', 
                            pocasie=pocasie, 
                            obed=obed, 
-                           udalosti=udalosti)
+                           udalosti=udalosti,
+                           datum_zobrazenia=datum_zobrazenia,
+                           je_dnes=je_dnes)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)

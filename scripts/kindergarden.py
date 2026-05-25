@@ -5,7 +5,10 @@ import re
 from bs4 import BeautifulSoup
 from datetime import datetime
 
-def ziskaj_dnesny_obed():
+def ziskaj_dnesny_obed(target_date=None):
+    if target_date is None:
+        target_date = datetime.now()
+
     url = "https://msborska.edupage.org/menu/"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -35,6 +38,29 @@ def ziskaj_dnesny_obed():
         meal_types = ["Desiata", "Obed", "Olovrant", "Mliečna desiata"]
         days_regex = r'^(Po|Ut|St|Št|Pi|Pondelok|Utorok|Streda|Štvrtok|Piatok)(\s|$|\d|\.)'
         
+        def vycisti_nazov(meal_desc_list):
+            raw_nazov = " ".join(meal_desc_list)
+            # 1. Rozdelenie podľa zátvoriek a označení menu (A:, B:, C: atď.)
+            # Všetko v zátvorkách nahradíme novým riadkom, rovnako aj "A:", "C:" atď.
+            temp_text = re.sub(r'\s*\([^)]*\)', '\n', raw_nazov)
+            temp_text = re.sub(r'\s*[A-Z]:\s*', '\n', temp_text)
+            temp_text = temp_text.replace('*', '')
+            
+            # 2. Definícia balastu, ktorý chceme úplne odstrániť
+            blacklist = [r'výlet\s+tr\.[a-z,.]+', r'tr\.[a-z,.]+', r'zamestnanci:']
+            
+            lines = []
+            for l in temp_text.split('\n'):
+                l_clean = l.strip()
+                # Odstránenie balastných vzorov z vnútra riadku
+                for pattern in blacklist:
+                    l_clean = re.sub(pattern, '', l_clean, flags=re.IGNORECASE).strip()
+                
+                # Pridáme riadok len ak po vyčistení obsahuje zmysluplný text (viac ako 1 znak)
+                if l_clean and len(l_clean) > 1:
+                    lines.append(f"• {l_clean}")
+            return "\n".join(lines)
+
         for line in lines:
             line = line.strip()
             if not line: continue
@@ -45,7 +71,7 @@ def ziskaj_dnesny_obed():
                 if current_day and current_meal_type and current_meal_desc:
                     weekly_menu.setdefault(current_day, []).append({
                         "typ": current_meal_type,
-                        "nazov": " ".join(current_meal_desc)
+                        "nazov": vycisti_nazov(current_meal_desc)
                     })
                 current_day = line
                 current_meal_type = None
@@ -61,7 +87,7 @@ def ziskaj_dnesny_obed():
                         if current_meal_type and current_meal_desc:
                             weekly_menu.setdefault(current_day, []).append({
                                 "typ": current_meal_type,
-                                "nazov": " ".join(current_meal_desc)
+                                "nazov": vycisti_nazov(current_meal_desc)
                             })
                         
                         # Nastavíme nový typ jedla
@@ -93,7 +119,7 @@ def ziskaj_dnesny_obed():
         if current_day and current_meal_type and current_meal_desc:
             weekly_menu.setdefault(current_day, []).append({
                 "typ": current_meal_type,
-                "nazov": " ".join(current_meal_desc)
+                "nazov": vycisti_nazov(current_meal_desc)
             })
 
         # Záchranná brzda
@@ -106,7 +132,7 @@ def ziskaj_dnesny_obed():
         print("✓ Lístok pre malého úspešne vyextrahovaný a uložený!")
         
         # Pre dashboard vrátime len zoznam jedál (názvy) pre aktuálny deň
-        dnes_idx = datetime.now().weekday()  # 0=Pondelok, 1=Utorok...
+        dnes_idx = target_date.weekday()  # 0=Pondelok, 1=Utorok...
         skratky = {0: "Po", 1: "Ut", 2: "St", 3: "Št", 4: "Pi"}
         hladana_skratka = skratky.get(dnes_idx)
 
