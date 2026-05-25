@@ -1,13 +1,26 @@
 from flask import Flask, render_template
 import logging
-from scripts.weather import ziskaj_predpoved_bratislava
-from scripts.kindergarden import ziskaj_dnesny_obed
-from scripts.school_calendar import ziskaj_udalosti
+import sys
+import os
+
+# Pridanie koreňového adresára do cesty pre istotu, ak by Gunicorn štartoval z iného miesta
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 app = Flask(__name__)
 
 # Nastavenie logovania do konzoly (uvidíš v journalctl)
 logging.basicConfig(level=logging.INFO)
+
+try:
+    from scripts.weather import ziskaj_predpoved_bratislava
+    from scripts.kindergarden import ziskaj_dnesny_obed
+    from scripts.school_calendar import ziskaj_udalosti
+except ImportError as e:
+    app.logger.error(f"KRITICKÁ CHYBA IMPORTU: {e}")
+    # Definujeme náhradné funkcie, aby Flask aspoň naštartoval a vyhol sa 502
+    ziskaj_predpoved_bratislava = lambda: None
+    ziskaj_dnesny_obed = lambda: ["Chyba pri načítaní skriptov."]
+    ziskaj_udalosti = lambda: []
 
 @app.route('/')
 def home():
