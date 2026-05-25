@@ -1,0 +1,22 @@
+name: Deploy na DigitalOcean Droplet
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Spustenie príkazov na serveri cez SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets::SERVER_IP }}
+          username: ${{ secrets::SERVER_USER }}
+          key: ${{ secrets::SERVER_SSH_KEY }}
+          script: |
+            cd ~/leo
+            git pull origin main
+            source venv/bin/activate
+            pip install -r requirements.txt
+            sudo systemctl restart leo
