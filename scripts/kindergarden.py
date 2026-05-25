@@ -4,7 +4,7 @@ import requests
 import re
 from bs4 import BeautifulSoup
 
-def get_menu():
+def ziskaj_dnesny_obed():
     url = "https://msborska.edupage.org/menu/"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -103,9 +103,13 @@ def get_menu():
             json.dump(weekly_menu, f, ensure_ascii=False, indent=4)
 
         print("✓ Lístok pre malého úspešne vyextrahovaný a uložený!")
+        
+        # Pre dashboard vrátime len zoznam jedál (názvy) pre prvý nájdený deň (dnešok)
+        if weekly_menu and "Chyba" not in weekly_menu:
+            first_day = list(weekly_menu.keys())[0]
+            return [m["nazov"] for m in weekly_menu[first_day]]
+        return ["Menu nie je k dispozícii."]
 
     except Exception as e:
         print(f"Chyba pri scrapovaní: {e}")
-
-if __name__ == "__main__":
-    get_menu()
+        return [f"Chyba: {e}"]

@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def get_calendar():
+def ziskaj_udalosti():
     url = "https://msborska.edupage.org/calendar/"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -109,7 +109,8 @@ def get_calendar():
 
                     # Ochrana pred duplicitami
                     if not any(e["nazov"] == title_text for e in events):
-                        events.append({"datum": full_date, "nazov": title_text})
+                        # Premenujeme 'datum' na 'cas', aby to sedelo s tvojou šablónou index.html
+                        events.append({"cas": full_date, "nazov": title_text})
 
         # Ak horná doménová štruktúra zlyhala, použijeme záložný textový parser na presné riadky zo screenshotu
         if not events:
@@ -152,7 +153,7 @@ def get_calendar():
                 ):
                     events.append(
                         {
-                            "datum": f"{temp_day}. {temp_wday} - {active_month}",
+                            "cas": f"{temp_day}. {temp_wday} - {active_month}",
                             "nazov": line,
                         }
                     )
@@ -163,7 +164,7 @@ def get_calendar():
         if not events:
             events = [
                 {
-                    "datum": "Info",
+                    "cas": "Info",
                     "nazov": "Momentálne nie sú v kalendári žiadne nadchádzajúce udalosti.",
                 }
             ]
