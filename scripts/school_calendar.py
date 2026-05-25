@@ -179,4 +179,4 @@ def ziskaj_udalosti():
 
 
 if __name__ == "__main__":
-    get_calendar()
+    ziskaj_udalosti()
