@@ -1,0 +1,72 @@
+{
+    "Po": [
+        {
+            "typ": "Desiata",
+            "nazov": "Nátierka z tuniaka (2.068) (20) Chlieb na desiatu (3.007) zemiakový (55) Uhorky šalátové (2.088) (13) Čaj ovocný s medom a citrónom (1.009) (150)"
+        },
+        {
+            "typ": "Obed",
+            "nazov": "A: Polievka Markina (5.045) (180/250) Osie hniezda (15.029) kakaové (150/270) Jahody (ovocná obloha) (23.015) (20/34) Mlieko plnotučné (1.014) (150/250)"
+        },
+        {
+            "typ": "Olovrant",
+            "nazov": "Maslo (2.006) (20) Pečivo celozrnné (3.013) graham (50) Paprika (2.084) (15) Čaj ovocno-bylinkový (1.003) (150) *Školský program EÚ-syr tvrdý plátkový* (2.092a) (30)"
+        }
+    ],
+    "Ut": [
+        {
+            "typ": "Desiata",
+            "nazov": "Nátierka tvarohová so zeleninou (2.005) (30) Chlieb na desiatu (3.007) ražný (55) Čaj ovocný, nesladený (1.008) (150) Jablká (22.011) (75) *Školský program EÚ-mlieko Dráčik 250ml* (1.013a) (250)"
+        },
+        {
+            "typ": "Obed",
+            "nazov": "A: Polievka hovädzia - falošná (5.150) (180/250) Cestoviny - niťovky (4.003) (13/20) Karbonátok so syrom * (13.020) (SK, RO) (65/130) Zemiaky na kyslo (18.014) (190/280) Chlieb k prívarku celozrnný (3.004) viaczrnný kváskový (40/100) Stolová voda (1.025) (200/250) Zamestnanci: jablko C: Maslo (2.006) výlet tr.A,G (20/0) Žemle (3.014) kaiserka natural výlet tr.A,G (50/0) Šunka (2.093) výlet tr.A,G (SK) (10/0) Detská výživa (23.002) 1ks tr.A,G (120/0) *Školský program EÚ-syr tvrdý plátkový* (2.092a) tr.A.G (10/0) Paprika (2.084) (15/0) Pomaranče (ovocná obloha) (23.019) (20/0)"
+        },
+        {
+            "typ": "Olovrant",
+            "nazov": "Nátierka papriková s pečeným cesnakom (2.118) (20) Žemle (3.014) kaiserka (50) Paradajky (2.085) (19) Čaj ovocný, nesladený (1.008) (150)"
+        }
+    ],
+    "St": [
+        {
+            "typ": "Desiata",
+            "nazov": "Nátierka syrová s reďkovkou (2.101) (20) Pečivo vodové (3.012) sendvič (50) Mlieko plnotučné (1.014) (150) Hrozno (22.009) biele bez jadierok (90)"
+        },
+        {
+            "typ": "Obed",
+            "nazov": "A: Polievka kelová (5.049) so zemiakmi (180/250) Morčacie prsia poľovnícke * (9.036) (HU) (111/202) Ryža dusená (17.011) (110/190) Šalát z čínskej kapusty (24.043) (50/110) Prírodná ovocná šťava 100% (1.030) (150/250) Zamestnanci: hrozno"
+        },
+        {
+            "typ": "Olovrant",
+            "nazov": "Čučoriedkové mascarpone s piškótami (21.058) (80) Stolová voda (1.025) (200) Detská výživa (23.002) 1ks (120/200)"
+        }
+    ],
+    "Št": [
+        {
+            "typ": "Desiata",
+            "nazov": "Nátierka drožďová s maslom (2.099) (16) Chlieb na desiatu (3.007) rascový (55) Mrkva (2.083) (12) Čaj bylinkový s medom (1.004) (150) *Školský program EÚ-mlieko Dráčik 250ml* (1.013a) (250)"
+        },
+        {
+            "typ": "Obed",
+            "nazov": "A: Polievka fazuľová mliečna (5.016) (180/250) Králik na smotane so zeleninou (11.001) (114/209) Cestoviny (17.001) (120/185) Voda s citrónovou šťavou a bylinkami (1.028) (150/250) Zamestnanci: banán"
+        },
+        {
+            "typ": "Olovrant",
+            "nazov": "Nátierka z bravčového mäsa (2.063) (20) Chlieb na olovrant celozrnný (3.010) špaldový kváskový (55) Zeleninová obloha – zeler stopkový (2.140) (15) Prírodná ovocná šťava 100% (1.030) (150)"
+        }
+    ],
+    "Pi": [
+        {
+            "typ": "Desiata",
+            "nazov": "Nátierka vajcová s oškvarkami * (2.033) (20) Pečivo celozrnné (3.013) tmavé cereálne (50) Cibuľa jarná (2.079) (10) Detský čaj čierny bez kofeínu s medom a citrónom (1.006) (150) *Školský program EÚ-mlieko Dráčik 250ml* (1.013a) (250)"
+        },
+        {
+            "typ": "Obed",
+            "nazov": "A: Polievka halászle (5.179a) (200/345) Granadiersky pochod (14.005) (170/350) Šalát uhorkový (24.036) (60/120) Stolová voda (1.025) (200/250)"
+        },
+        {
+            "typ": "Olovrant",
+            "nazov": "Fazuľové brownies (21.045) (90) Mlieko plnotučné (1.014) (150) Detská výživa (23.002) 1ks (120/200)"
+        }
+    ]
+}
