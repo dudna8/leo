@@ -1,8 +1,9 @@
 import json
 import os
+import re
 import requests
 from bs4 import BeautifulSoup
-from datetime import datetime, date, timedelta
+from datetime import datetime, date
 
 
 def ziskaj_udalosti():
@@ -19,12 +20,10 @@ def ziskaj_udalosti():
     }
     
     today = datetime.now().date()
-
-    # Logika pre posun zobrazenia: ak je dnes víkend, hľadáme až od pondelka
     zobrazit_od = today
-    if today.weekday() >= 5:  # 5 = Sobota, 6 = Nedeľa
-        dni_do_pondelka = 7 - today.weekday()
-        zobrazit_od = today + timedelta(days=dni_do_pondelka)
+
+    # Predvolíme aktuálny mesiac, ak by na začiatku chýbala hlavička
+    current_month = list(mesiace_map.keys())[today.month - 1]
 
     current_dir = os.path.dirname(os.path.abspath(__file__))
     project_root = os.path.dirname(current_dir)
@@ -39,19 +38,20 @@ def ziskaj_udalosti():
         soup = BeautifulSoup(response.text, "html.parser")
         events = []
 
-        # Tvoj HTML kód ukázal, že celý kalendár je v <ul> s triedou 'skgdCalendar'
-        calendar_list = soup.find("ul", class_=lambda x: x and "skgdCalendar" in x)
+        # Hľadáme všetky li elementy v celom dokumente, ktoré majú kalendárne triedy
+        all_items = soup.find_all("li", class_=lambda x: x and "calendar_" in x)
 
-        if calendar_list:
-            current_month = ""
-            
-            # Prejdeme všetky priame <li> elementy (riadky) v tomto zozname
-            for li in calendar_list.find_all("li", recursive=False):
+        if all_items:
+            for li in all_items:
                 
                 # 1. Je to nadpis mesiaca? (Podľa tvojho kódu: calendar_DFText_1)
                 month_el = li.find(class_=lambda x: x and "calendar_DFText_1" in x)
                 if month_el:
-                    current_month = month_el.get_text(strip=True).capitalize()
+                    header_text = month_el.get_text(strip=True)
+                    for m_name in mesiace_map:
+                        if m_name.lower() in header_text.lower():
+                            current_month = m_name
+                            break
                     continue
                 
                 # 2. Je to udalosť? 
@@ -61,27 +61,45 @@ def ziskaj_udalosti():
                 title_el = li.find(class_=lambda x: x and "calendar_DFText_4" in x)
                 
                 if day_num_el and title_el:
-                    day_num = day_num_el.get_text(strip=True)
+                    day_text = day_num_el.get_text(strip=True)
+                    # Vytiahneme všetky čísla (napr. z "25.-26.5." dostaneme ['25', '26', '5'])
+                    nums = re.findall(r'\d+', day_text)
+                    if not nums:
+                        continue
+
+                    d_start = int(nums[0])
+                    d_end = int(nums[1]) if len(nums) > 1 and "-" in day_text else d_start
                     
                     # Názov môže obsahovať <br>, takže to elegantne spojíme s čiarou
                     title_text = title_el.get_text(separator=" | ", strip=True)
                     
-                    # Logika pre výpočet zostávajúcich dní
+                    # Určenie mesiaca - buď z hlavičky, alebo priamo z dátumu (napr. 1.6.)
                     m_num = mesiace_map.get(current_month, today.month)
+                    
+                    # Ak je deň udalosti výrazne menší ako dnešný deň a ešte sme neprepli mesiac v hlavičke,
+                    # pravdepodobne už ide o nasledujúci mesiac
+                    if not li.find(class_=lambda x: x and "calendar_DFText_1" in x) and d_start < today.day - 5:
+                        m_num = (today.month % 12) + 1
+
+                    if len(nums) >= 2 and "." in day_text:
+                        maybe_m = int(nums[-1])
+                        if 1 <= maybe_m <= 12:
+                            m_num = maybe_m
+
                     year = today.year
                     
-                    # Ak je mesiac udalosti menší ako aktuálny mesiac, pravdepodobne ide o budúci rok
                     if m_num < today.month:
                         year += 1
                     
                     try:
-                        event_date = date(year, m_num, int(day_num))
+                        event_date_start = date(year, m_num, d_start)
+                        event_date_end = date(year, m_num, d_end)
                         
-                        # NEUKAZOVAT VECI KTORE UZ BOLI (alebo sú cez víkend, ak je dnes víkend)
-                        if event_date < zobrazit_od:
+                        # Ak udalosť už skončila, ignorujeme ju. Ak trvá (end >= dnes), necháme ju.
+                        if event_date_end < zobrazit_od:
                             continue
                             
-                        diff = (event_date - today).days
+                        diff = (event_date_start - today).days
                         
                         if diff == 0:
                             ostava = "dnes"
@@ -92,26 +110,38 @@ def ziskaj_udalosti():
                         else:
                             ostava = f"o {diff} dní"
                             
-                        cas_display = f"{day_num}.{m_num}."
+                        # Formátovanie na "26.5." alebo "26.-27.5."
+                        if d_start != d_end:
+                            cas_display = f"{d_start}.-{d_end}.{m_num}."
+                        else:
+                            cas_display = f"{d_start}.{m_num}."
                     except ValueError:
                         continue
 
                     events.append({
+                        "date_obj": event_date_start,  # Pomocný objekt pre zoradenie
                         "cas": cas_display,
                         "ostava": ostava,
                         "nazov": title_text
                     })
 
-        if not events:
+        if events:
+            # ZORADENIE: Najbližšie udalosti (dnes, zajtra) budú prvé
+            events.sort(key=lambda x: x["date_obj"])
+            
+            # Vezmeme 5 najbližších
+            events = events[:5]
+            
+            # Odstránime pomocný objekt, aby nebol v JSON/HTML
+            for e in events:
+                e.pop("date_obj", None)
+        else:
             events = [
                 {
                     "cas": "Info",
                     "nazov": "Momentálne nie sú v kalendári žiadne nadchádzajúce udalosti."
                 }
             ]
-
-        # Obmedzíme počet zobrazených udalostí na 5 najnovších
-        events = events[:5]
 
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(events, f, ensure_ascii=False, indent=4)

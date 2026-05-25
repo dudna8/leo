@@ -15,21 +15,18 @@ try:
     from scripts.weather import ziskaj_predpoved_bratislava
     from scripts.kindergarden import ziskaj_dnesny_obed
     from scripts.school_calendar import ziskaj_udalosti
-    from scripts.namedays import ziskaj_meniny
 except ImportError as e:
     app.logger.error(f"KRITICKÁ CHYBA IMPORTU: {e}")
     # Definujeme náhradné funkcie, aby Flask aspoň naštartoval a vyhol sa 502
     ziskaj_predpoved_bratislava = lambda: None
     ziskaj_dnesny_obed = lambda: [{"typ": "Chyba", "nazov": "Chyba pri načítaní skriptov."}]
     ziskaj_udalosti = lambda: []
-    ziskaj_meniny = lambda: "Neznáme"
 
 @app.route('/')
 def home():
     pocasie = None
     obed = [{"typ": "Info", "nazov": "Informácie o obede nie sú dostupné."}]
     udalosti = []
-    meniny = "Neznáme"
 
     try:
         pocasie = ziskaj_predpoved_bratislava()
@@ -46,16 +43,10 @@ def home():
     except Exception as e:
         app.logger.error(f"Chyba kalendar: {e}")
 
-    try:
-        meniny = ziskaj_meniny()
-    except Exception as e:
-        app.logger.error(f"Chyba meniny: {e}")
-    
     return render_template('index.html', 
                            pocasie=pocasie, 
                            obed=obed, 
-                           udalosti=udalosti,
-                           meniny=meniny)
+                           udalosti=udalosti)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)
