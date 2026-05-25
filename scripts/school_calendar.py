@@ -4,7 +4,7 @@ import requests
 from bs4 import BeautifulSoup
 
 
-def get_calendar():
+def ziskaj_udalosti():
     url = "https://msborska.edupage.org/calendar/"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -53,14 +53,14 @@ def get_calendar():
                     
                     full_date = f"{day_num}. {day_name} ({current_month})"
                     events.append({
-                        "datum": full_date,
+                        "cas": full_date,
                         "nazov": title_text
                     })
 
         if not events:
             events = [
                 {
-                    "datum": "Info",
+                    "cas": "Info",
                     "nazov": "Momentálne nie sú v kalendári žiadne nadchádzajúce udalosti."
                 }
             ]
@@ -69,9 +69,14 @@ def get_calendar():
             json.dump(events, f, ensure_ascii=False, indent=4)
 
         print("✓ Kalendár úspešne stiahnutý pomocou priamych tried z HTML!")
+        return events
 
     except Exception as e:
         print(f"Chyba pri scrapovaní: {e}")
+        return []
+
+if __name__ == "__main__":
+    ziskaj_udalosti()
 
 
 if __name__ == "__main__":

@@ -3,6 +3,7 @@ import os
 import requests
 import re
 from bs4 import BeautifulSoup
+from datetime import datetime
 
 def ziskaj_dnesny_obed():
     url = "https://msborska.edupage.org/menu/"
@@ -104,10 +105,16 @@ def ziskaj_dnesny_obed():
 
         print("✓ Lístok pre malého úspešne vyextrahovaný a uložený!")
         
-        # Pre dashboard vrátime len zoznam jedál (názvy) pre prvý nájdený deň (dnešok)
+        # Pre dashboard vrátime len zoznam jedál (názvy) pre aktuálny deň
+        dnes_idx = datetime.now().weekday()  # 0=Pondelok, 1=Utorok...
+        skratky = {0: "Po", 1: "Ut", 2: "St", 3: "Št", 4: "Pi"}
+        hladana_skratka = skratky.get(dnes_idx)
+
         if weekly_menu and "Chyba" not in weekly_menu:
-            first_day = list(weekly_menu.keys())[0]
-            return [m["nazov"] for m in weekly_menu[first_day]]
+            if hladana_skratka:
+                for kluc in weekly_menu.keys():
+                    if kluc.startswith(hladana_skratka):
+                        return [m["nazov"] for m in weekly_menu[kluc]]
         return ["Menu nie je k dispozícii."]
 
     except Exception as e:
