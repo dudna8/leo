@@ -92,8 +92,13 @@
             <div class="clock-container">
                 <div id="current-time">00:00:00</div>
                 <div id="current-date">Načítavam dátum...</div>
-                <div class="{% if not je_dnes %}pulse-text{% endif %}" style="margin-top: 15px; font-size: 0.95rem; color: {% if je_dnes %}var(--accent){% else %}#e67e22{% endif %}; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">
-                    <i class="bi bi-calendar-check"></i> Údaje pre: {{ datum_zobrazenia }}
+                <div class="{% if not je_dnes %}pulse-text{% endif %}" style="margin-top: 15px;">
+                    <span style="background: {% if je_dnes %}var(--accent){% else %}#e67e22{% endif %}; color: white; padding: 4px 12px; border-radius: 50px; font-size: 0.8rem; font-weight: 800; text-transform: uppercase; margin-right: 8px;">
+                        {{ relativny_label }}
+                    </span>
+                    <span style="font-size: 0.95rem; color: var(--text-muted); font-weight: 600;">
+                        {{ datum_zobrazenia }}
+                    </span>
                 </div>
             </div>
         </header>
@@ -124,6 +129,15 @@
                     {% for chod in obed %}
                     <div class="item">
                         <div class="meal-type {% if 'Desiata' in chod.typ %}type-desiata{% elif 'Obed' in chod.typ %}type-obed{% elif 'Olovrant' in chod.typ %}type-olovrant{% else %}type-default{% endif %}">
+                            {% if 'Desiata' in chod.typ %}
+                                <i class="bi bi-apple"></i>
+                            {% elif 'Obed' in chod.typ %}
+                                <i class="bi bi-cup-hot"></i>
+                            {% elif 'Olovrant' in chod.typ %}
+                                <i class="bi bi-cookie"></i>
+                            {% else %}
+                                <i class="bi bi-egg-fried"></i>
+                            {% endif %}
                             {{ chod.typ }}
                         </div>
                         <span class="meal-name">{{ chod.nazov }}</span>

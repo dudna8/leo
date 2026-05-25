@@ -44,6 +44,15 @@ def home():
     # Zistíme, či zobrazujeme dnešný deň
     je_dnes = target_date == now.date()
 
+    # Určenie relatívneho labelu (Dnes, Zajtra, Pondelok...)
+    dni = ["Pondelok", "Utorok", "Streda", "Štvrtok", "Piatok", "Sobota", "Nedeľa"]
+    if je_dnes:
+        relativny_label = "Dnes"
+    elif target_date == now.date() + timedelta(days=1):
+        relativny_label = "Zajtra"
+    else:
+        relativny_label = dni[target_date.weekday()]
+
     try:
         pocasie = ziskaj_predpoved_bratislava(target_date)
     except Exception as e:
@@ -59,8 +68,6 @@ def home():
     except Exception as e:
         app.logger.error(f"Chyba kalendar: {e}")
 
-    # Formátovanie dátumu pre zobrazenie v hlavičke (napr. Pondelok 20.05.2024)
-    dni = ["Pondelok", "Utorok", "Streda", "Štvrtok", "Piatok", "Sobota", "Nedeľa"]
     datum_zobrazenia = f"{dni[target_date.weekday()]} {target_date.strftime('%d.%m.%Y')}"
 
     return render_template('index.html', 
@@ -68,7 +75,8 @@ def home():
                            obed=obed, 
                            udalosti=udalosti,
                            datum_zobrazenia=datum_zobrazenia,
-                           je_dnes=je_dnes)
+                           je_dnes=je_dnes,
+                           relativny_label=relativny_label)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8000, debug=True)
