@@ -1,27 +1,34 @@
 from flask import Flask, render_template
-from weather import ziskaj_predpoved_bratislava
-from kindergarden import ziskaj_dnesny_obed
-from school_calendar import ziskaj_udalosti
+import logging
+from scripts.weather import ziskaj_predpoved_bratislava
+from scripts.kindergarden import ziskaj_dnesny_obed
+from scripts.school_calendar import ziskaj_udalosti
 
 app = Flask(__name__)
 
+# Nastavenie logovania do konzoly (uvidíš v journalctl)
+logging.basicConfig(level=logging.INFO)
+
 @app.route('/')
 def home():
-    # Získanie dát s jednoduchým ošetrením chýb
+    pocasie = None
+    obed = ["Informácie o obede nie sú dostupné."]
+    udalosti = []
+
     try:
         pocasie = ziskaj_predpoved_bratislava()
-    except Exception:
-        pocasie = None
+    except Exception as e:
+        app.logger.error(f"Chyba pocasie: {e}")
 
     try:
         obed = ziskaj_dnesny_obed()
-    except Exception:
-        obed = ["Nepodarilo sa načítať jedálny lístok."]
+    except Exception as e:
+        app.logger.error(f"Chyba obed: {e}")
 
     try:
         udalosti = ziskaj_udalosti()
-    except Exception:
-        udalosti = []
+    except Exception as e:
+        app.logger.error(f"Chyba kalendar: {e}")
     
     return render_template('index.html', 
                            pocasie=pocasie, 
