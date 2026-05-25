@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leo Dashboard</title>
+    <style>
+        :root { --bg: #f0f2f5; --card: #ffffff; --text: #1c1e21; --accent: #007bff; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { text-align: center; margin-bottom: 30px; }
+        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .card { background: var(--card); border-radius: 12px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .card h2 { margin-top: 0; font-size: 1.2rem; color: var(--accent); border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
+        .item { padding: 10px 0; border-bottom: 1px solid #eee; }
+        .item:last-child { border-bottom: none; }
+        .time { font-weight: bold; color: #555; margin-right: 10px; }
+        .weather-info { display: flex; justify-content: space-between; align-items: center; }
+        ul { padding-left: 20px; margin: 0; }
+        li { margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Môj ranný prehľad</h1>
+        </header>
+
+        <div class="dashboard">
+            <!-- POČASIE -->
+            <div class="card">
+                <h2>☀️ Počasie (Bratislava)</h2>
+                {% if pocasie %}
+                    {% for p in pocasie %}
+                    <div class="item weather-info">
+                        <span class="time">{{ p.cas }}</span>
+                        <span>{{ p.teplota }}</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Dáta o počasí nie sú momentálne dostupné.</p>
+                {% endif %}
+            </div>
+
+            <!-- OBED -->
+            <div class="card">
+                <h2>🍲 Dnešný obed</h2>
+                {% if obed and obed is iterable and obed is not string %}
+                    <ul>
+                        {% for chod in obed %}
+                            <li class="item">{{ chod }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>{{ obed }}</p>
+                {% endif %}
+            </div>
+
+            <!-- KALENDÁR -->
+            <div class="card">
+                <h2>📅 Školský kalendár</h2>
+                {% if udalosti %}
+                    {% for u in udalosti %}
+                    <div class="item">
+                        <span class="time">{{ u.cas }}</span>
+                        <span>{{ u.nazov }}</span>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p>Na dnes nie sú naplánované žiadne udalosti.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
