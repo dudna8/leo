@@ -41,17 +41,34 @@ def ziskaj_predpoved_bratislava():
             80: "Prehánky",
             95: "Búrka"
         }
+
+        # Mapovanie WMO kódov na Bootstrap Icons triedy
+        wmo_ikony = {
+            0: "bi-sun",
+            1: "bi-cloud-sun",
+            2: "bi-cloud-sun",
+            3: "bi-cloud",
+            45: "bi-cloud-fog",
+            51: "bi-cloud-drizzle",
+            61: "bi-cloud-rain",
+            71: "bi-cloud-snow",
+            80: "bi-cloud-rain-heavy",
+            95: "bi-cloud-lightning-rain"
+        }
         
         # Výber konkrétnych hodín (indexy 7, 12, 16 zodpovedajú daným hodinám dňa)
         vybrane_casy = [7, 12, 16]
-        vysledky = {}
+        vysledky = []
         
         for hodina in vybrane_casy:
             if hodina < len(teploty):
-                vysledky[f"{hodina}:00"] = {
+                kod = kody_pocasia[hodina]
+                vysledky.append({
+                    "cas": f"{hodina}:00",
                     "teplota": f"{teploty[hodina]}°C",
-                    "stav": wmo_popis.get(kody_pocasia[hodina], f"Kód {kody_pocasia[hodina]}")
-                }
+                    "stav": wmo_popis.get(kod, "Neznáme"),
+                    "ikona": wmo_ikony.get(kod, "bi-question-circle")
+                })
         
         return vysledky
 

@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leo Dashboard</title>
+    <!-- Bootstrap Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <style>
         :root { --bg: #f0f2f5; --card: #ffffff; --text: #1c1e21; --accent: #007bff; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }
@@ -16,6 +18,7 @@
         .item:last-child { border-bottom: none; }
         .time { font-weight: bold; color: #555; margin-right: 10px; }
         .weather-info { display: flex; justify-content: space-between; align-items: center; }
+        .weather-icon { font-size: 1.5rem; color: #ffa500; margin-right: 10px; }
         ul { padding-left: 20px; margin: 0; }
         li { margin-bottom: 5px; }
     </style>
@@ -33,8 +36,11 @@
                 {% if pocasie %}
                     {% for p in pocasie %}
                     <div class="item weather-info">
-                        <span class="time">{{ p.cas }}</span>
-                        <span>{{ p.teplota }}</span>
+                        <div>
+                            <span class="time">{{ p.cas }}</span>
+                            <i class="bi {{ p.ikona }} weather-icon" title="{{ p.stav }}"></i>
+                        </div>
+                        <span style="font-weight: bold;">{{ p.teplota }}</span>
                     </div>
                     {% endfor %}
                 {% else %}
