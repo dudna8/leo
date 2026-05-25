@@ -40,26 +40,37 @@ def ziskaj_dnesny_obed(target_date=None):
         
         def vycisti_nazov(meal_desc_list):
             raw_nazov = " ".join(meal_desc_list)
-            # 1. Rozdelenie podľa zátvoriek a označení menu (A:, B:, C: atď.)
-            # Všetko v zátvorkách nahradíme novým riadkom, rovnako aj "A:", "C:" atď.
-            temp_text = re.sub(r'\s*\([^)]*\)', '\n', raw_nazov)
-            temp_text = re.sub(r'\s*[A-Z]:\s*', '\n', temp_text)
-            temp_text = temp_text.replace('*', '')
+            # 1. Odstránenie hviezdic a nahradenie zátvoriek/menu značiek oddeľovačom
+            text = raw_nazov.replace('*', '')
+            text = re.sub(r'\s*\([^)]*\)', '|', text)
+            text = re.sub(r'\s*([A-Z]:)\s*', r'|\1 ', text)
             
             # 2. Definícia balastu, ktorý chceme úplne odstrániť
-            blacklist = [r'výlet\s+tr\.[a-z,.]+', r'tr\.[a-z,.]+', r'zamestnanci:']
+            blacklist = [r'výlet\s+tr\.[a-z0-9,.]+', r'tr\.[a-z0-9,.]+', r'zamestnanci:']
             
-            lines = []
-            for l in temp_text.split('\n'):
-                l_clean = l.strip()
-                # Odstránenie balastných vzorov z vnútra riadku
-                for pattern in blacklist:
-                    l_clean = re.sub(pattern, '', l_clean, flags=re.IGNORECASE).strip()
+            # 3. Rozdelenie a čistenie častí
+            parts = re.split(r'[|\n]', text)
+            final_parts = []
+            
+            for p in parts:
+                p_clean = p.strip()
+                # Odstránenie markerov menu (A:, B:...) z vnútra alebo začiatku
+                p_clean = re.sub(r'^[A-Z]:\s*', '', p_clean)
                 
-                # Pridáme riadok len ak po vyčistení obsahuje zmysluplný text (viac ako 1 znak)
-                if l_clean and len(l_clean) > 1:
-                    lines.append(f"• {l_clean}")
-            return "\n".join(lines)
+                for pattern in blacklist:
+                    p_clean = re.sub(pattern, '', p_clean, flags=re.IGNORECASE).strip()
+                
+                if not p_clean: continue
+                
+                # 4. Inteligentné spájanie fragmentov
+                # Ak časť začína malým písmenom, je príliš krátka (napr. "1ks"), alebo je to spojka (na, so),
+                # prilepíme ju k predchádzajúcej časti namiesto novej bodky.
+                if final_parts and (p_clean[0].islower() or len(p_clean) < 5 or p_clean.startswith('so ') or p_clean.startswith('na ')):
+                    final_parts[-1] = f"{final_parts[-1]} {p_clean}"
+                elif len(p_clean) > 1:
+                    final_parts.append(p_clean)
+            
+            return "\n".join([f"• {p}" for p in final_parts])
 
         for line in lines:
             line = line.strip()
